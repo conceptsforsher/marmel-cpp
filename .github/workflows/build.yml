@@ -30,8 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake g++ libcurl4-openssl-dev
+      - name: Toolchain check
+        run: |
+          cmake --version | head -1
+          g++ --version | head -1
+          ls /usr/include/curl/curl.h
+          nproc
 
       - name: Configure ${{ matrix.folder }}
         run: cmake -S "${{ matrix.folder }}" -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
