@@ -14,12 +14,26 @@ of thought stays reviewable step by step:
   (`Marmel v0.1`, 2026-08-30): full C++20 port, CMake, 32 tests green.
 - `commits/02-…` and on — future commits, one folder each, in upstream order.
 
+## CI (no local builds)
+
+Nothing is compiled on a workstation. Every push runs `.github/workflows/build.yml`:
+
+- one matrix job per `commits/*` folder: configure → build (`-Wall -Wextra`) → `ctest`;
+- a `loc parity report` job that clones `Na1w/marmel`, reads `parity-map.txt` and prints
+  upstream Rust LOC vs translated C++ LOC per commit (artifact: `loc-parity-report`).
+
+```sh
+bash scripts/parity.sh <clone-of-Na1w/marmel> parity-map.txt
+```
+
 ## Build (per commit folder)
 
 ```sh
 cmake -S commits/01-marmel-v0.1 -B build && cmake --build build -j
 ./build/marmel_tests && ./build/marmel --help
 ```
+
+(This is what CI runs; only use it locally if you knowingly accept a local build.)
 
 ## Method
 

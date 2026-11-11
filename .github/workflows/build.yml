@@ -1,0 +1,67 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  list:
+    name: discover translation folders
+    runs-on: ubuntu-latest
+    outputs:
+      folders: ${{ steps.matrix.outputs.folders }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        run: |
+          folders=$(find commits -maxdepth 1 -mindepth 1 -type d -printf '%p\n' | sort | tr '\n' ' ' | xargs -n1 echo | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "folders=$folders" >> "$GITHUB_OUTPUT"
+          echo "$folders"
+
+  build:
+    name: ${{ matrix.folder }}
+    needs: list
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJson(needs.list.outputs.folders) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake g++ libcurl4-openssl-dev
+
+      - name: Configure ${{ matrix.folder }}
+        run: cmake -S "${{ matrix.folder }}" -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - name: Build ${{ matrix.folder }}
+        run: cmake --build build -j"$(nproc)"
+
+      - name: Test ${{ matrix.folder }}
+        working-directory: build
+        run: ctest --output-on-failure --timeout 600
+
+      - name: Smoke ${{ matrix.folder }}
+        run: |
+          if [ -x build/marmel ]; then ./build/marmel --help || true; fi
+
+  parity:
+    name: loc parity report
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch upstream Na1w/marmel
+        run: git clone --quiet https://github.com/Na1w/marmel.git upstream
+
+      - name: Run parity report
+        run: bash scripts/parity.sh upstream parity-map.txt | tee parity.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: loc-parity-report
+          path: parity.md

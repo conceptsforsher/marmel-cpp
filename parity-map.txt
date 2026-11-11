@@ -1,0 +1,3 @@
+# One line per translated upstream commit: "<folder> <upstream-sha>"
+# Kept in upstream commit order; scripts/parity.sh and CI read this file.
+commits/01-marmel-v0.1 b741f9e
