@@ -34,7 +34,7 @@ jobs:
         run: |
           cmake --version | head -1
           g++ --version | head -1
-          ls /usr/include/curl/curl.h
+          ls /usr/include/curl/curl.h || ls /usr/include/x86_64-linux-gnu/curl/curl.h || echo "no libcurl headers -> CMake uses stub HTTP transport"
           nproc
 
       - name: Configure ${{ matrix.folder }}
