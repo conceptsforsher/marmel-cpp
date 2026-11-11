@@ -6,3 +6,4 @@ project(smallagent
 # Each commits/NN-* folder is a self-contained CMake project mirroring one
 # upstream commit. Add new translations here as they land.
 add_subdirectory(commits/01-marmel-v0.1)
+add_subdirectory(commits/02-mcp-integration)
