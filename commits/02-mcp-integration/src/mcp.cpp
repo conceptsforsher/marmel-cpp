@@ -139,9 +139,9 @@ public:
             if (!v.is_object()) continue;
             // Shared response envelope: mismatched ids (numeric or string) are
             // skipped, errors bubble out with code, message and server name.
-            JsonRpcResponse resp = JsonRpcResponse::from_json(v);
-            if (!resp.id_matches(id)) continue;
-            return resp.into_result(server_);
+            JsonRpcResponse envelope = JsonRpcResponse::from_json(v);
+            if (!envelope.id_matches(id)) continue;
+            return envelope.into_result(server_);
         }
 #else
         throw std::runtime_error("mcp: unsupported platform");
